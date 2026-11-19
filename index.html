@@ -339,8 +339,22 @@ $('#b-print').onclick = () => {
 };
 
 // ---------- Arranque: ¿viene una ficha en el link? ----------
+// ---------- Ficha corta cifrada: #k<id 8><llave 22> ----------
+async function cargarCifrada(frag){
+  const id = frag.slice(0,8), llave = unb64u(frag.slice(8));
+  const r = await fetch(`d/${id}.txt`, {cache:'no-store'});
+  if (!r.ok) throw new Error('Ficha no encontrada');
+  const blob = unb64u((await r.text()).trim());
+  const k = await crypto.subtle.importKey('raw', llave, 'AES-GCM', false, ['decrypt']);
+  const plano = await crypto.subtle.decrypt({name:'AES-GCM', iv: blob.slice(0,12)}, k, blob.slice(12));
+  return decodificar(new TextDecoder().decode(plano));
+}
 async function iniciar(){
   const h = location.hash;
+  if (h.startsWith('#k') && h.length > 20){
+    try { const d = await cargarCifrada(h.slice(2)); render(d); mostrar('ver'); return; }
+    catch(e){ console.warn(e); $('#modo-ver').innerHTML = '<div class="wrap"><div class="alerta"><h3>FICHA NO DISPONIBLE</h3><p>No se pudo cargar la ficha. Revise su conexión a internet o llame al SAMU 131.</p></div></div>'; mostrar('ver'); return; }
+  }
   if (h.startsWith('#f') && h.length > 3){
     try { const d = await decodificar(h.slice(2)); render(d); mostrar('ver'); return; }
     catch(e){ console.warn('Link inválido', e); }
