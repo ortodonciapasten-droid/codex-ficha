@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha de Emergencia</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root{
+    --rojo:#C62828; --rojo-suave:#FDECEA; --tinta:#1B1F24; --gris:#5F6670; --linea:#E3E6EA;
+    --fondo:#F6F7F9; --blanco:#fff; --verde:#1E7D4F; --azul:#1F4E8C;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--tinta);line-height:1.45}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+  header.top{background:var(--rojo);color:#fff;padding:18px 16px}
+  header.top .wrap{padding:0}
+  header.top h1{margin:0;font-size:1.35rem;display:flex;align-items:center;gap:10px}
+  header.top p{margin:4px 0 0;opacity:.9;font-size:.95rem}
+  .cruz{width:28px;height:28px;flex:none}
+  section.card{background:var(--blanco);border:1px solid var(--linea);border-radius:14px;padding:18px;margin:16px 0}
+  section.card h2{margin:0 0 12px;font-size:1.05rem;color:var(--rojo);letter-spacing:.02em}
+  label{display:block;font-size:.88rem;color:var(--gris);margin:10px 0 4px;font-weight:600}
+  input,select,textarea{width:100%;padding:11px 12px;font-size:1rem;border:1px solid #CDD2D8;border-radius:10px;background:#fff;color:var(--tinta);font-family:inherit}
+  textarea{min-height:70px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:transparent}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .contacto{border-top:1px dashed var(--linea);padding-top:6px;margin-top:10px}
+  .contacto:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .checks label{display:flex;align-items:center;gap:6px;margin:0;padding:8px 12px;border:1px solid #CDD2D8;border-radius:999px;font-weight:500;color:var(--tinta);cursor:pointer;font-size:.92rem}
+  .checks input{width:auto;margin:0}
+  .checks label:has(input:checked){background:var(--rojo-suave);border-color:var(--rojo)}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  button,.btn{appearance:none;border:0;border-radius:10px;padding:12px 18px;font-size:1rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+  .primario{background:var(--rojo);color:#fff}
+  .secundario{background:#fff;color:var(--tinta);border:1px solid #CDD2D8}
+  .nota{font-size:.85rem;color:var(--gris)}
+  .hidden{display:none!important}
+
+  /* Resultado */
+  #resultado .qrbox{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  #qr svg{width:200px;height:200px;display:block}
+  #link{width:100%;font-size:.8rem;font-family:ui-monospace,Menlo,monospace;background:var(--fondo)}
+  .ok{color:var(--verde);font-weight:600}
+
+  /* Vista de emergencia */
+  .v-head{background:var(--rojo);color:#fff;padding:22px 16px 18px}
+  .v-head .wrap{padding:0}
+  .v-tag{font-size:.8rem;font-weight:700;letter-spacing:.12em;opacity:.9}
+  .v-nombre{font-size:1.9rem;font-weight:800;margin:4px 0 2px;line-height:1.15}
+  .v-sub{font-size:1.05rem;opacity:.95}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);padding:6px 12px;border-radius:999px;font-weight:700}
+  .samu{display:flex;justify-content:space-between;align-items:center;background:var(--tinta);color:#fff;border-radius:14px;padding:14px 16px;margin:16px 0;text-decoration:none}
+  .samu b{font-size:1.6rem}
+  .alerta{background:var(--rojo-suave);border:2px solid var(--rojo);border-radius:14px;padding:14px 16px;margin:16px 0}
+  .alerta h3{margin:0 0 4px;color:var(--rojo);font-size:.85rem;letter-spacing:.08em}
+  .alerta p{margin:0;font-size:1.2rem;font-weight:700}
+  .v-sec{background:#fff;border:1px solid var(--linea);border-radius:14px;padding:14px 16px;margin:12px 0}
+  .v-sec h3{margin:0 0 6px;font-size:.8rem;letter-spacing:.08em;color:var(--gris)}
+  .v-sec p{margin:0;font-size:1.08rem;white-space:pre-wrap}
+  .tel{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--linea);text-decoration:none;color:inherit}
+  .tel:first-of-type{border-top:0}
+  .tel .num{font-size:1.15rem;font-weight:700;color:var(--verde);white-space:nowrap}
+  .pie{font-size:.8rem;color:var(--gris);text-align:center;margin-top:20px}
+  .pie a{color:var(--gris)}
+
+  /* Tarjeta imprimible */
+  .tarjeta{width:85.6mm;height:54mm;border:1.5px solid var(--rojo);border-radius:3mm;display:flex;overflow:hidden;background:#fff;margin-top:14px}
+  .tarjeta .izq{flex:1;padding:3mm 3.5mm;display:flex;flex-direction:column;justify-content:space-between}
+  .tarjeta .t1{color:var(--rojo);font-weight:800;font-size:8pt;letter-spacing:.06em}
+  .tarjeta .t2{font-weight:800;font-size:10.5pt;line-height:1.1}
+  .tarjeta .t3{font-size:7pt;color:var(--gris)}
+  .tarjeta .der{width:30mm;display:flex;align-items:center;justify-content:center;padding:2mm}
+  .tarjeta .der svg{width:27mm;height:27mm}
+  @media print{
+    body{background:#fff}
+    body *{visibility:hidden}
+    .tarjeta,.tarjeta *{visibility:visible}
+    .tarjeta{position:absolute;left:10mm;top:10mm}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= MODO EDICIÓN ================= -->
+<div id="modo-form">
+  <header class="top"><div class="wrap">
+    <h1><svg class="cruz" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="20" rx="1.5" fill="#fff"/><rect x="2" y="9" width="20" height="6" rx="1.5" fill="#fff"/></svg>Ficha de Emergencia <span style="font-size:.75rem;font-weight:600;opacity:.8;margin-left:4px">· Códex</span></h1>
+    <p>Completa los datos. Se genera un link y un código QR que cualquier persona puede abrir en una emergencia.</p>
+  </div></header>
+
+  <form class="wrap" id="form" autocomplete="off">
+    <section class="card">
+      <h2>1. Datos personales</h2>
+      <label for="n">Nombre completo *</label>
+      <input id="n" required placeholder="Ej: María Elena Rojas Soto">
+      <div class="grid">
+        <div><label for="fn">Fecha de nacimiento</label><input id="fn" type="date"></div>
+        <div><label for="rut">RUT (opcional)</label><input id="rut" placeholder="12.345.678-9"></div>
+      </div>
+      <label for="cel">Celular de la persona</label>
+      <input id="cel" type="tel" placeholder="+56 9 …">
+      <label for="dir">Dirección</label>
+      <input id="dir" placeholder="Calle, número, comuna">
+      <label for="idi">Idioma / comunicación</label>
+      <input id="idi" placeholder="Ej: Habla solo español, escucha poco por oído izquierdo">
+    </section>
+
+    <section class="card">
+      <h2>Mensaje principal y ambulancia</h2>
+      <label for="msj">Mensaje que se muestra primero (opcional)</label>
+      <input id="msj" placeholder="Ej: En caso de emergencia, llamar a mis hijos y a la UCM">
+      <div class="grid">
+        <div><label for="amb">Servicio de ambulancia contratado</label><input id="amb" placeholder="Ej: UCM, Help, Clínica…"></div>
+        <div><label for="ambt">Teléfono (y opción del menú)</label><input id="ambt" placeholder="Ej: 2 2391 4444 (opción 4)"></div>
+      </div>
+      <p class="nota">Si no hay servicio contratado, la ficha muestra el SAMU 131.</p>
+    </section>
+
+    <section class="card">
+      <h2>2. Información médica</h2>
+      <div class="grid">
+        <div><label for="gs">Grupo sanguíneo</label>
+          <select id="gs"><option value="">No sabe</option><option>O+</option><option>O−</option><option>A+</option><option>A−</option><option>B+</option><option>B−</option><option>AB+</option><option>AB−</option></select></div>
+        <div><label for="prev">Previsión de salud</label><input id="prev" placeholder="Ej: FONASA B / Isapre Colmena"></div>
+        <div></div><div><label for="prevt">Teléfono previsión</label><input id="prevt" type="tel" placeholder="Ej: 600 600 3600"></div>
+      </div>
+      <label for="al">Alergias (medicamentos, alimentos, látex…)</label>
+      <textarea id="al" placeholder="Ej: Penicilina, AINEs. Si no tiene, escriba: Ninguna conocida"></textarea>
+      <label for="enf">Enfermedades / diagnósticos</label>
+      <textarea id="enf" placeholder="Ej: Hipertensión, diabetes tipo 2, fibrilación auricular"></textarea>
+      <label for="med">Medicamentos que toma (uno por línea: nombre, dosis y frecuencia)</label>
+      <textarea id="med" rows="5" placeholder="Ej: Losartán 50 mg c/12 h; Acenocumarol (anticoagulante)"></textarea>
+      <label for="ci">Cirugías, implantes y dispositivos</label>
+      <textarea id="ci" placeholder="Ej: Marcapasos (2021), prótesis de cadera derecha"></textarea>
+      <label>Condiciones importantes para quien atiende</label>
+      <div class="checks" id="flags">
+        <label><input type="checkbox" value="anticoag">Usa anticoagulante</label>
+        <label><input type="checkbox" value="inmuno">Inmunosuprimido/a</label>
+        <label><input type="checkbox" value="dental">Prótesis dental removible</label>
+        <label><input type="checkbox" value="audif">Usa audífonos</label>
+        <label><input type="checkbox" value="lentes">Usa lentes</label>
+        <label><input type="checkbox" value="cognit">Deterioro cognitivo / demencia</label>
+        <label><input type="checkbox" value="movil">Movilidad reducida</label>
+        <label><input type="checkbox" value="vive-solo">Vive solo/a</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. Atención habitual</h2>
+      <div class="grid">
+        <div><label for="dr">Médico tratante</label><input id="dr" placeholder="Dr./Dra."></div>
+        <div><label for="drt">Teléfono médico</label><input id="drt" type="tel" placeholder="+56 9 …"></div>
+      </div>
+      <label for="cs">Centro de salud habitual</label>
+      <input id="cs" placeholder="Ej: CESFAM Apoquindo / Clínica Las Condes">
+      <label for="ind">Indicaciones especiales o voluntades</label>
+      <textarea id="ind" placeholder="Ej: Tiene documento de voluntades anticipadas; lo guarda su hija"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>4. Contactos de emergencia</h2>
+      <div id="contactos"></div>
+    </section>
+
+    <div class="btns">
+      <button type="submit" class="primario">Generar link y QR</button>
+    </div>
+    <p class="nota">Privacidad: los datos no se guardan en ningún servidor. Viajan dentro del propio link/QR. Quien tenga el link puede leer la ficha, igual que una pulsera médica.</p>
+
+    <section class="card hidden" id="resultado">
+      <h2>Listo: link y QR de la ficha</h2>
+      <div class="qrbox">
+        <div id="qr"></div>
+        <div style="flex:1;min-width:220px">
+          <p class="ok" style="margin-top:0">Escanea el QR o abre el link para ver la ficha.</p>
+          <div class="btns" style="margin-top:6px">
+            <button type="button" class="secundario" id="b-copiar">Copiar link</button>
+            <button type="button" class="secundario" id="b-ver">Ver ficha</button>
+            <button type="button" class="secundario" id="b-print">Imprimir tarjeta</button>
+          </div>
+          <p class="nota" id="msg"></p>
+        </div>
+      </div>
+      <label for="link">Link de la ficha</label>
+      <textarea id="link" readonly rows="3"></textarea>
+      <label>Tarjeta para billetera (85 × 54 mm)</label>
+      <div class="tarjeta" id="tarjeta"></div>
+    </section>
+  </form>
+</div>
+
+<!-- ================= MODO EMERGENCIA ================= -->
+<div id="modo-ver" class="hidden"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const CAMPOS = ['n','fn','rut','cel','dir','idi','msj','amb','ambt','gs','prev','prevt','al','enf','med','ci','dr','drt','cs','ind'];
+const FLAGS = {anticoag:'⚠ Usa anticoagulante', inmuno:'⚠ Inmunosuprimido/a', dental:'Prótesis dental removible', audif:'Usa audífonos', lentes:'Usa lentes', cognit:'Deterioro cognitivo', movil:'Movilidad reducida', 'vive-solo':'Vive solo/a'};
+
+// Contactos
+const cont = $('#contactos');
+for (let i=0;i<4;i++){
+  cont.insertAdjacentHTML('beforeend', `<div class="contacto"><div class="grid">
+    <div><label>Nombre contacto ${i+1}${i===0?' *':''}</label><input data-c="${i}" data-k="n" ${i===0?'required':''}></div>
+    <div><label>Parentesco</label><input data-c="${i}" data-k="r" placeholder="Hija, vecino…"></div>
+    <div><label>Teléfono</label><input data-c="${i}" data-k="t" type="tel" placeholder="+56 9 …" ${i===0?'required':''}></div>
+  </div></div>`);
+}
+
+// ---------- Codificación: JSON → deflate → base64url ----------
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64u = s => Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+async function codificar(obj){
+  const datos = new TextEncoder().encode(JSON.stringify(obj));
+  if (window.CompressionStream){
+    const comp = await new Response(new Blob([datos]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();
+    return 'z' + b64u(comp);
+  }
+  return 'j' + b64u(datos);
+}
+async function decodificar(s){
+  const tipo = s[0], bytes = unb64u(s.slice(1));
+  let txt;
+  if (tipo==='z'){
+    const des = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+    txt = new TextDecoder().decode(des);
+  } else txt = new TextDecoder().decode(bytes);
+  return JSON.parse(txt);
+}
+
+function leerForm(){
+  const d = {};
+  CAMPOS.forEach(k => { const v = $('#'+k).value.trim(); if (v) d[k]=v; });
+  const f = [...document.querySelectorAll('#flags input:checked')].map(x=>x.value);
+  if (f.length) d.f = f;
+  const c = [];
+  for (let i=0;i<4;i++){
+    const g = k => document.querySelector(`[data-c="${i}"][data-k="${k}"]`).value.trim();
+    if (g('n')||g('t')) c.push({n:g('n'), r:g('r'), t:g('t')});
+  }
+  if (c.length) d.c = c;
+  d.u = new Date().toISOString().slice(0,10);
+  return d;
+}
+function llenarForm(d){
+  CAMPOS.forEach(k => { if (d[k]) $('#'+k).value = d[k]; });
+  (d.f||[]).forEach(v => { const x = document.querySelector(`#flags input[value="${v}"]`); if (x) x.checked = true; });
+  (d.c||[]).forEach((c,i) => ['n','r','t'].forEach(k => { const el = document.querySelector(`[data-c="${i}"][data-k="${k}"]`); if (el) el.value = c[k]||''; }));
+}
+
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const telHref = t => 'tel:' + String(t).replace(/[^\d+]/g,'');
+function edad(fn){
+  if (!fn) return '';
+  const n = new Date(fn+'T12:00'), h = new Date();
+  let e = h.getFullYear()-n.getFullYear();
+  if (h < new Date(h.getFullYear(), n.getMonth(), n.getDate())) e--;
+  return isNaN(e) ? '' : e;
+}
+function fechaCL(iso){ if(!iso) return ''; const [a,m,d]=iso.split('-'); return `${d}-${m}-${a}`; }
+
+function qrSVG(texto, px){
+  const qr = qrcode(0,'M'); qr.addData(texto); qr.make();
+  return qr.createSvgTag({cellSize: px||4, margin: 2, scalable: true});
+}
+
+// ---------- Vista de emergencia ----------
+function render(d, enlace){
+  const e = edad(d.fn);
+  const sec = (t, v) => v ? `<div class="v-sec"><h3>${t}</h3><p>${esc(v)}</p></div>` : '';
+  const flags = (d.f||[]).map(f => `<span class="chip">${esc(FLAGS[f]||f)}</span>`).join('');
+  const contactos = (d.c||[]).map(c => `<a class="tel" href="${telHref(c.t)}"><span><b>${esc(c.n)}</b>${c.r?`<br><span class="nota">${esc(c.r)}</span>`:''}</span><span class="num">${esc(c.t)}</span></a>`).join('');
+  $('#modo-ver').innerHTML = `
+    <div class="v-head"><div class="wrap">
+      <div class="v-tag">FICHA DE EMERGENCIA MÉDICA</div>
+      <div class="v-nombre">${esc(d.n)}</div>
+      <div class="v-sub">${e!==''?`${e} años`:''}${d.fn?` · Nac. ${fechaCL(d.fn)}`:''}${d.rut?` · RUT ${esc(d.rut)}`:''}</div>
+      <div class="chips">${d.gs?`<span class="chip">Sangre ${esc(d.gs)}</span>`:''}${flags}</div>
+    </div></div>
+    <div class="wrap">
+      ${d.msj?`<div class="alerta" style="background:#fff"><p style="font-size:1.05rem">${esc(d.msj)}</p></div>`:''}
+      ${d.amb||d.ambt?`<a class="samu" style="background:var(--rojo)" href="${telHref((d.ambt||'').split('(')[0])}"><span>${esc(d.amb||'Ambulancia contratada')}<br><span class="nota" style="color:#fde">Servicio de ambulancia de la persona</span></span><b style="font-size:1.2rem;text-align:right">${esc(d.ambt||'')}</b></a>`:''}
+      <a class="samu" href="tel:131"><span>Ambulancia SAMU<br><span class="nota" style="color:#ccc">Llamar si la persona no responde o está grave</span></span><b>131</b></a>
+      <div class="alerta"><h3>ALERGIAS</h3><p>${esc(d.al||'No informadas')}</p></div>
+      ${contactos?`<div class="v-sec"><h3>CONTACTOS DE EMERGENCIA</h3>${contactos}</div>`:''}
+      ${d.med?`<div class="v-sec"><h3>MEDICAMENTOS</h3><ul style="margin:0;padding-left:20px;font-size:1.05rem">${d.med.split('\n').filter(x=>x.trim()).map(x=>`<li>${esc(x.replace(/^[•\-*]\s*/,''))}</li>`).join('')}</ul></div>`:''}
+      ${sec('ENFERMEDADES / DIAGNÓSTICOS', d.enf)}
+      ${sec('CIRUGÍAS, IMPLANTES Y DISPOSITIVOS', d.ci)}
+      ${sec('PREVISIÓN DE SALUD', [d.prev, d.prevt].filter(Boolean).join(' · '))}
+      ${sec('MÉDICO TRATANTE', [d.dr, d.drt].filter(Boolean).join(' · '))}
+      ${sec('CENTRO DE SALUD HABITUAL', d.cs)}
+      ${sec('INDICACIONES ESPECIALES', d.ind)}
+      ${sec('COMUNICACIÓN', d.idi)}
+      ${sec('DIRECCIÓN', d.dir)}
+      ${sec('CELULAR DE LA PERSONA', d.cel)}
+      <p class="pie">Actualizada el ${fechaCL(d.u)} · Información entregada por la persona o su familia; confirmar con la persona cuando sea posible.<br>
+      <a href="#" id="v-editar">Editar esta ficha</a></p>
+    </div>`;
+  $('#v-editar').onclick = ev => { ev.preventDefault(); llenarForm(d); mostrar('form'); };
+}
+function mostrar(m){
+  $('#modo-form').classList.toggle('hidden', m!=='form');
+  $('#modo-ver').classList.toggle('hidden', m!=='ver');
+  window.scrollTo(0,0);
+}
+
+// ---------- Generar ----------
+let ultimo = null;
+$('#form').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const d = leerForm();
+  const codigo = await codificar(d);
+  const base = location.href.split('#')[0];
+  const enlace = `${base}#f${codigo}`;
+  ultimo = {d, enlace};
+  $('#link').value = enlace;
+  $('#qr').innerHTML = qrSVG(enlace, 4);
+  $('#tarjeta').innerHTML = `<div class="izq">
+      <div><div class="t1">✚ EMERGENCIA MÉDICA</div><div class="t2">${esc(d.n)}</div>
+      <div class="t3">${d.gs?'Sangre '+esc(d.gs)+' · ':''}${d.al?'Alergias: '+esc(d.al.slice(0,40)):''}</div></div>
+      <div class="t3">${d.c&&d.c[0]?`Contacto: ${esc(d.c[0].n)}<br><b style="color:#1B1F24;font-size:8pt">${esc(d.c[0].t)}</b>`:''}<br>Escanee el código para ver la ficha completa</div>
+    </div><div class="der">${qrSVG(enlace, 3)}</div>`;
+  $('#msg').textContent = `Link de ${enlace.length} caracteres.`;
+  $('#resultado').classList.remove('hidden');
+  $('#resultado').scrollIntoView({behavior:'smooth'});
+});
+$('#b-copiar').onclick = async () => {
+  try { await navigator.clipboard.writeText($('#link').value); $('#msg').textContent = 'Link copiado.'; }
+  catch { $('#link').select(); $('#msg').textContent = 'Selecciona el link y cópialo manualmente.'; }
+};
+$('#b-ver').onclick = () => { if (ultimo){ render(ultimo.d); mostrar('ver'); } };
+$('#b-print').onclick = () => {
+  try { window.print(); } catch {}
+  $('#msg').textContent = 'Si no se abre la impresión, publica la app en tu propio dominio (ver instrucciones).';
+};
+
+// ---------- Arranque: ¿viene una ficha en el link? ----------
+async function iniciar(){
+  const h = location.hash;
+  if (h.startsWith('#f') && h.length > 3){
+    try { const d = await decodificar(h.slice(2)); render(d); mostrar('ver'); return; }
+    catch(e){ console.warn('Link inválido', e); }
+  }
+  mostrar('form');
+}
+window.addEventListener('hashchange', iniciar);
+iniciar();
+</script>
+</body>
+</html>
